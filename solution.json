@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.17.1.54307",
-      "templateHash": "9942998837630502817"
+      "templateHash": "13507346713345469808"
     }
   },
   "parameters": {
@@ -337,7 +337,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.17.1.54307",
-              "templateHash": "11001749910741895963"
+              "templateHash": "18021405861486984504"
             }
           },
           "parameters": {
@@ -644,7 +644,7 @@
                     "_generator": {
                       "name": "bicep",
                       "version": "0.17.1.54307",
-                      "templateHash": "4685556854998564369"
+                      "templateHash": "10187618105992642087"
                     }
                   },
                   "parameters": {
@@ -745,7 +745,7 @@
                       "identity": "[parameters('VirtualMachineIdentity')]",
                       "zones": "[if(equals(parameters('Availability'), 'AvailabilityZones'), createArray(string(parameters('AvailabilityZones')[mod(range(0, parameters('SessionHostCount'))[copyIndex()], length(parameters('AvailabilityZones')))])), null())]",
                       "properties": {
-                        "availabilitySet": "[if(equals(parameters('Availability'), 'AvailabilitySet'), createObject('id', resourceId('Microsoft.Compute/availabilitySets', format('{0}{1}', parameters('AvailabilitySetNamePrefix'), div(add(range(0, parameters('SessionHostCount'))[copyIndex()], parameters('SessionHostIndex')), 200)))), null())]",
+                        "availabilitySet": "[if(equals(parameters('Availability'), 'AvailabilitySet'), createObject('id', resourceId('Microsoft.Compute/availabilitySets', format('{0}{1}', parameters('AvailabilitySetNamePrefix'), padLeft(div(add(range(0, parameters('SessionHostCount'))[copyIndex()], parameters('SessionHostIndex')), 200), 2, '0')))), null())]",
                         "hardwareProfile": {
                           "vmSize": "[parameters('VirtualMachineSize')]"
                         },
