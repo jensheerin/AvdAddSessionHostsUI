@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.16.1.55165",
-      "templateHash": "8252276870194908375"
+      "version": "0.17.1.54307",
+      "templateHash": "9942998837630502817"
     }
   },
   "parameters": {
@@ -117,8 +117,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.16.1.55165",
-              "templateHash": "13124285536761099116"
+              "version": "0.17.1.54307",
+              "templateHash": "1543235606614166007"
             }
           },
           "parameters": {
@@ -184,8 +184,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.16.1.55165",
-              "templateHash": "3808913105652658962"
+              "version": "0.17.1.54307",
+              "templateHash": "17258894170017447927"
             }
           },
           "parameters": {
@@ -336,8 +336,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.16.1.55165",
-              "templateHash": "16492241732076332000"
+              "version": "0.17.1.54307",
+              "templateHash": "11001749910741895963"
             }
           },
           "parameters": {
@@ -453,6 +453,25 @@
           "resources": [
             {
               "copy": {
+                "name": "availabilitySet",
+                "count": "[length(range(0, parameters('AvailabilitySetCount')))]"
+              },
+              "condition": "[equals(parameters('Availability'), 'AvailabilitySet')]",
+              "type": "Microsoft.Compute/availabilitySets",
+              "apiVersion": "2019-07-01",
+              "name": "[format('{0}{1}', parameters('AvailabilitySetNamePrefix'), padLeft(add(range(0, parameters('AvailabilitySetCount'))[copyIndex()], parameters('AvailabilitySetIndex')), 2, '0'))]",
+              "location": "[parameters('Location')]",
+              "tags": "[parameters('VirtualMachineTags')]",
+              "sku": {
+                "name": "Aligned"
+              },
+              "properties": {
+                "platformUpdateDomainCount": 5,
+                "platformFaultDomainCount": 2
+              }
+            },
+            {
+              "copy": {
                 "name": "networkInterfaces",
                 "count": "[length(range(0, parameters('SessionHostCount')))]"
               },
@@ -496,7 +515,7 @@
                 "autoUpgradeMinorVersion": true,
                 "settings": {
                   "fileUris": [
-                    "https://raw.githubusercontent.com/mikedzikowski/AVDRipAndReplace/main/templateSpec/scripts/Set-SessionHostConfiguration.ps1"
+                    "https://raw.githubusercontent.com/jamasten/AvdAddSessionHostsUI/main/scripts/Set-SessionHostConfiguration.ps1"
                   ],
                   "timestamp": "[parameters('Timestamp')]"
                 },
@@ -530,83 +549,6 @@
                 "customScriptExtension",
                 "[resourceId('Microsoft.Resources/deployments', format('VirtualMachines_{0}', parameters('Timestamp')))]"
               ]
-            },
-            {
-              "condition": "[equals(parameters('Availability'), 'AvailabilitySet')]",
-              "type": "Microsoft.Resources/deployments",
-              "apiVersion": "2022-09-01",
-              "name": "[format('AvailabilitySets_{0}', parameters('Timestamp'))]",
-              "properties": {
-                "expressionEvaluationOptions": {
-                  "scope": "inner"
-                },
-                "mode": "Incremental",
-                "parameters": {
-                  "AvailabilitySetCount": {
-                    "value": "[parameters('AvailabilitySetCount')]"
-                  },
-                  "AvailabilitySetIndex": {
-                    "value": "[parameters('AvailabilitySetIndex')]"
-                  },
-                  "AvailabilitySetNamePrefix": {
-                    "value": "[parameters('AvailabilitySetNamePrefix')]"
-                  },
-                  "Location": {
-                    "value": "[parameters('Location')]"
-                  },
-                  "Tags": {
-                    "value": "[parameters('VirtualMachineTags')]"
-                  }
-                },
-                "template": {
-                  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-                  "contentVersion": "1.0.0.0",
-                  "metadata": {
-                    "_generator": {
-                      "name": "bicep",
-                      "version": "0.16.1.55165",
-                      "templateHash": "92089633043262153"
-                    }
-                  },
-                  "parameters": {
-                    "AvailabilitySetCount": {
-                      "type": "int"
-                    },
-                    "AvailabilitySetIndex": {
-                      "type": "int"
-                    },
-                    "AvailabilitySetNamePrefix": {
-                      "type": "string"
-                    },
-                    "Location": {
-                      "type": "string"
-                    },
-                    "Tags": {
-                      "type": "object"
-                    }
-                  },
-                  "resources": [
-                    {
-                      "copy": {
-                        "name": "availabilitySet",
-                        "count": "[length(range(0, parameters('AvailabilitySetCount')))]"
-                      },
-                      "type": "Microsoft.Compute/availabilitySets",
-                      "apiVersion": "2019-07-01",
-                      "name": "[format('{0}{1}', parameters('AvailabilitySetNamePrefix'), padLeft(add(range(0, parameters('AvailabilitySetCount'))[copyIndex()], parameters('AvailabilitySetIndex')), 2, '0'))]",
-                      "location": "[parameters('Location')]",
-                      "tags": "[parameters('Tags')]",
-                      "sku": {
-                        "name": "Aligned"
-                      },
-                      "properties": {
-                        "platformUpdateDomainCount": 5,
-                        "platformFaultDomainCount": 2
-                      }
-                    }
-                  ]
-                }
-              }
             },
             {
               "type": "Microsoft.Resources/deployments",
@@ -701,8 +643,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.16.1.55165",
-                      "templateHash": "4814628106245680382"
+                      "version": "0.17.1.54307",
+                      "templateHash": "4685556854998564369"
                     }
                   },
                   "parameters": {
@@ -920,8 +862,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.16.1.55165",
-                      "templateHash": "15168696318044535992"
+                      "version": "0.17.1.54307",
+                      "templateHash": "10923910493753546301"
                     }
                   },
                   "parameters": {

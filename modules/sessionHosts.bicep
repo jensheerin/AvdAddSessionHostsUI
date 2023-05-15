@@ -30,7 +30,6 @@ param VirtualMachineNamePrefix string
 param VirtualMachineSize string
 param VirtualMachineTags object
 
-
 var Intune = DomainServices == 'NoneWithIntune' ? true : false
 var NetworkInterfaceNamePrefix = 'nic-${VirtualMachineNamePrefix}-'
 var VmIdentityType = (contains(DomainServices, 'None') ? ((!empty(UserAssignedIdentity)) ? 'SystemAssigned, UserAssigned' : 'SystemAssigned') : ((!empty(UserAssignedIdentity)) ? 'UserAssigned' : 'None'))
@@ -49,16 +48,18 @@ resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
   scope: resourceGroup(KeyVaultSubscriptionId, KeyVaultResourceGroupName)
 }
 
-module availabilitySets 'availabilitySets.bicep' = if (Availability == 'AvailabilitySet') {
-  name: 'AvailabilitySets_${Timestamp}'
-  params: {
-    AvailabilitySetCount: AvailabilitySetCount
-    AvailabilitySetIndex: AvailabilitySetIndex
-    AvailabilitySetNamePrefix: AvailabilitySetNamePrefix
-    Location: Location
-    Tags: VirtualMachineTags
+resource availabilitySet 'Microsoft.Compute/availabilitySets@2019-07-01' = [for i in range(0, AvailabilitySetCount): if (Availability == 'AvailabilitySet') {
+  name: '${AvailabilitySetNamePrefix}${padLeft((i + AvailabilitySetIndex), 2, '0')}'
+  location: Location
+  tags: VirtualMachineTags
+  sku: {
+    name: 'Aligned'
   }
-}
+  properties: {
+    platformUpdateDomainCount: 5
+    platformFaultDomainCount: 2
+  }
+}]
 
 resource networkInterfaces 'Microsoft.Network/networkInterfaces@2020-05-01' = [for i in range(0, SessionHostCount): {
   name: '${NetworkInterfaceNamePrefix}${padLeft((i + SessionHostIndex), 4, '0')}'
@@ -91,7 +92,7 @@ module virtualMachines 'virtualMachines.bicep' = {
     AvailabilityZones: AvailabilityZones
     DiskEncryptionSetResourceId: DiskEncryptionSetResourceId
     DiskSku: DiskSku
-    ImageId  : ImageId
+    ImageId: ImageId
     ImageOffer: ImageOffer
     ImagePublisher: ImagePublisher
     ImageSku: ImageSku
@@ -125,7 +126,7 @@ resource customScriptExtension 'Microsoft.Compute/virtualMachines/extensions@202
     autoUpgradeMinorVersion: true
     settings: {
       fileUris: [
-        'https://raw.githubusercontent.com/mikedzikowski/AVDRipAndReplace/main/templateSpec/scripts/Set-SessionHostConfiguration.ps1'
+        'https://raw.githubusercontent.com/jamasten/AvdAddSessionHostsUI/main/scripts/Set-SessionHostConfiguration.ps1'
       ]
       timestamp: Timestamp
     }
