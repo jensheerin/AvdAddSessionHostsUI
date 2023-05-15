@@ -1,6 +1,5 @@
 targetScope = 'subscription'
 
-
 @allowed([
   'AvailabilitySet'
   'AvailabilityZones'
@@ -29,7 +28,6 @@ param Timestamp string = utcNow('yyyyMMddhhmmss')
 param VirtualMachineLocation string = deployment().location
 param VirtualMachineResourceGroupName string = ''
 
-
 /*  BEGIN BATCHING VARIABLES */
 // The following variables are used to determine the batches to deploy any number of AVD session hosts.
 var MaxResourcesPerTemplateDeployment = 133 // This is the max number of session hosts that can be deployed from the sessionHosts.bicep file in each batch / for loop. Math: (800 - <Number of Static Resources>) / <Number of Looped Resources> 
@@ -46,11 +44,9 @@ var EndAvSetRange = (SessionHostCount + SessionHostIndex) / MaxAvSetMembers // T
 var AvailabilitySetCount = length(range(BeginAvSetRange, (EndAvSetRange - BeginAvSetRange) + 1))
 /*  END AVAILABILITY SET COUNT */
 
-
 var KeyVaultName = split(KeyVaultResourceId, '/')[8]
 var KeyVaultResourceGroupName = split(KeyVaultResourceId, '/')[4]
 var KeyVaultSubscriptionId = split(KeyVaultResourceId, '/')[2]
-
 
 module hostPool 'modules/hostPool.bicep' = {
   name: 'ExistingHostPool_${Timestamp}'
@@ -89,7 +85,7 @@ module sessionHosts 'modules/sessionHosts.bicep' = [for i in range(1, SessionHos
     DomainServices: DomainServices
     HostPoolName: HostPoolName
     HostPoolResourceGroupName: HostPoolResourceGroupName
-    ImageId : hostPool.outputs.VMTemplate.customImageId == null ? '' : hostPool.outputs.VMTemplate.customImageId
+    ImageId: hostPool.outputs.VMTemplate.customImageId == null ? '' : hostPool.outputs.VMTemplate.customImageId
     ImageOffer: hostPool.outputs.VMTemplate.galleryImageOffer == null ? '' : hostPool.outputs.VMTemplate.galleryImageOffer
     ImagePublisher: hostPool.outputs.VMTemplate.galleryImagePublisher == null ? '' : hostPool.outputs.VMTemplate.galleryImagePublisher
     ImageSku: hostPool.outputs.VMTemplate.galleryImageSku == null ? '' : hostPool.outputs.VMTemplate.galleryImageSku
