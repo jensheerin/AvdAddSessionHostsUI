@@ -126,7 +126,7 @@ resource customScriptExtension 'Microsoft.Compute/virtualMachines/extensions@202
     autoUpgradeMinorVersion: true
     settings: {
       fileUris: [
-        'https://raw.githubusercontent.com/jamasten/AvdAddSessionHostsUI/main/scripts/Set-SessionHostConfiguration.ps1'
+        'https://raw.githubusercontent.com/jamasten/AvdAddSessionHostsUI/main/artifacts/Set-SessionHostConfiguration.ps1'
       ]
       timestamp: Timestamp
     }

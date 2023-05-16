@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.17.1.54307",
-      "templateHash": "13507346713345469808"
+      "templateHash": "5845956025725496257"
     }
   },
   "parameters": {
@@ -337,7 +337,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.17.1.54307",
-              "templateHash": "18021405861486984504"
+              "templateHash": "2685408475056336629"
             }
           },
           "parameters": {
@@ -515,7 +515,7 @@
                 "autoUpgradeMinorVersion": true,
                 "settings": {
                   "fileUris": [
-                    "https://raw.githubusercontent.com/jamasten/AvdAddSessionHostsUI/main/scripts/Set-SessionHostConfiguration.ps1"
+                    "https://raw.githubusercontent.com/jamasten/AvdAddSessionHostsUI/main/artifacts/Set-SessionHostConfiguration.ps1"
                   ],
                   "timestamp": "[parameters('Timestamp')]"
                 },
