@@ -26,11 +26,14 @@ To deploy this solution, the following items need to be configured before runnin
   - "DomainUserPrincipalName" - user principal name to domain join the session hosts
   - "LocalAdminPassword" - password for the local administrator account
   - "LocalAdminUsername" - username for the local administrator account
+
+> **NOTE:** The domain credentials are only required when domain joining your AVD session hosts.
+
 - Outbound network connectivity to download the following resources:
   - Script for Custom Script Extension
   - AVD Agents
 
-> **NOTE:** The domain credentials are only required when domain joining your AVD session hosts.
+> **NOTE:** These assets can be staged in an Azure storage account but you must download and modify the code to support that configuration.
 
 ## Deployment Options
 
