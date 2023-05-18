@@ -11,11 +11,6 @@ param Availability string = 'None'
 @description('If using availability sets, enter the name prefix for the resources.')
 param AvailabilitySetNamePrefix string = ''
 
-@allowed([
-  '1'
-  '2'
-  '3'
-])
 @description('If using availability zones, enter the desired zones for the AVD session hosts.')
 param AvailabilityZones array = [
   '1'
