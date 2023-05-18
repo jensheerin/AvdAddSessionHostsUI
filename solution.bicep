@@ -5,107 +5,147 @@ targetScope = 'subscription'
   'AvailabilityZones'
   'None'
 ])
+@description('Set the desired availability / SLA with a pooled host pool.  Choose "None" if deploying a personal host pool.')
 param Availability string = 'None'
+
+@description('If using availability sets, enter the name prefix for the resources.')
 param AvailabilitySetNamePrefix string = ''
+
+@allowed([
+  '1'
+  '2'
+  '3'
+])
+@description('If using availability zones, enter the desired zones for the AVD session hosts.')
 param AvailabilityZones array = [
   '1'
 ]
+
+@description('If using Server Side Encryption, enter the resource ID for the disk encryption set.')
 param DiskEncryptionSetResourceId string = ''
+
+@secure()
+@description('If domain or hybrid joining the session hosts, input the password for the principal that will join the hosts to the domain.')
+param DomainPassword string
+
 @allowed([
   'ActiveDirectory' // Active Directory Domain Services or Azure Active Directory Domain Services
   'None' // Azure AD Join
   'NoneWithIntune' // Azure AD Join with Intune enrollment
 ])
+@description('The service providing domain services for Azure Virtual Desktop.')
 param DomainServices string = 'ActiveDirectory'
-param HostPoolName string = ''
-param HostPoolResourceGroupName string = ''
-param KeyVaultResourceId string = ''
-param SessionHostCount int = 1
-param SessionHostIndex int = 0
+
+@secure()
+@description('If domain or hybrid joining the session hosts, input the user principal name for the principal that will join the hosts to the domain.')
+param DomainUserPrincipalName string
+
+@description('Enter the resource ID for the existing AVD host pool.')
+param HostPoolResourceId string
+
+@maxLength(24)
+@minLength(3)
+@description('Enter the name of the Azure key vault.')
+param KeyVaultName string = 'kv-avd-d-use'
+
+@secure()
+@description('Enter the local administrator password for the AVD session hosts.')
+param LocalAdminPassword string
+
+@secure()
+@description('Enter the local administrator username for the AVD session hosts.')
+param LocalAdminUsername string
+
+@description('Location for all the deployed resources and resource group.')
+param Location string = deployment().location
+
+@description('Enter the name of the new resource group that will be deployed with this solution')
+param ResourceGroupName string = 'rg-avd-d-use'
+
+@description('Enter an array of Object IDs for the security principals to assign to the Key Vault for template spec deployments.')
+param SecurityPrincipalObjectIds array
+
+@description('Enter the location for the AVD session hosts.')
+param SessionHostLocation string
+
+@description('The distinguished name for the target Organization Unit in Active Directory Domain Services.')
 param SessionHostOuPath string = ''
-param SubnetResourceId string = ''
+
+@description('Enter the resource group name for the AVD session hosts.')
+param SessionHostResourceGroupName string
+
+@description('Enter the resource ID for the target subnet for the AVD session hosts.')
+param SubnetResourceId string
+
+@description('The key / value pairs of metadata for the Azure resources.')
+param Tags object = {}
+
+@description('Enter the name for the template spec.')
+param TemplateSpecName string = 'ts-avd-d-use'
+
+@description('Enter the version number for the template spec version')
+param TemplateSpecVersion string = '1.0'
+
+@description('DO NOT MODIFY THIS VALUE! The timestamp is needed to differentiate deployments for certain Azure resources and must be set using a parameter.')
 param Timestamp string = utcNow('yyyyMMddhhmmss')
-param VirtualMachineLocation string = deployment().location
-param VirtualMachineResourceGroupName string = ''
 
-/*  BEGIN BATCHING VARIABLES */
-// The following variables are used to determine the batches to deploy any number of AVD session hosts.
-var MaxResourcesPerTemplateDeployment = 133 // This is the max number of session hosts that can be deployed from the sessionHosts.bicep file in each batch / for loop. Math: (800 - <Number of Static Resources>) / <Number of Looped Resources> 
-var DivisionValue = SessionHostCount / MaxResourcesPerTemplateDeployment // This determines if any full batches are required.
-var DivisionRemainderValue = SessionHostCount % MaxResourcesPerTemplateDeployment // This determines if any partial batches are required.
-var SessionHostBatchCount = DivisionRemainderValue > 0 ? DivisionValue + 1 : DivisionValue // This determines the total number of batches needed, whether full and / or partial.
-/*  END BATCHING VARIABLES */
+resource rg 'Microsoft.Resources/resourceGroups@2020-10-01' = {
+  name: ResourceGroupName
+  location: Location
+  tags: Tags
+}
 
-/*  BEGIN AVAILABILITY SET COUNT */
-// The following variables are used to determine the number of availability sets.
-var MaxAvSetMembers = 200 // This is the max number of session hosts that can be deployed in an availability set.
-var BeginAvSetRange = SessionHostIndex / MaxAvSetMembers // This determines the availability set to start with.
-var EndAvSetRange = (SessionHostCount + SessionHostIndex) / MaxAvSetMembers // This determines the availability set to end with.
-var AvailabilitySetCount = length(range(BeginAvSetRange, (EndAvSetRange - BeginAvSetRange) + 1))
-/*  END AVAILABILITY SET COUNT */
-
-var KeyVaultName = split(KeyVaultResourceId, '/')[8]
-var KeyVaultResourceGroupName = split(KeyVaultResourceId, '/')[4]
-var KeyVaultSubscriptionId = split(KeyVaultResourceId, '/')[2]
-
-module hostPool 'modules/hostPool.bicep' = {
-  name: 'ExistingHostPool_${Timestamp}'
-  scope: resourceGroup(HostPoolResourceGroupName)
-  params: {
-    HostPoolName: HostPoolName
+resource roleDefinition 'Microsoft.Authorization/roleDefinitions@2022-04-01' = {
+  name: guid(subscription().id, 'CaseWorkerDeploy')
+  properties: {
+    roleName: 'KeyVaultDeployAction_${subscription().subscriptionId}'
+    description: 'Allows a principal to get but not view Key Vault secrets for an ARM template deployment.'
+    assignableScopes: [
+      subscription().id
+    ]
+    permissions: [
+      {
+        actions: [
+          'Microsoft.KeyVault/vaults/deploy/action'
+        ]
+      }
+    ]
   }
 }
 
-module hostPoolRegistrationToken 'modules/hostPoolRegistrationToken.bicep' = {
-  name: 'HostPoolRegistrationToken_${Timestamp}'
-  scope: resourceGroup(HostPoolResourceGroupName)
+module keyVault 'modules/keyVault.bicep' = {
+  scope: rg
+  name: 'KeyVault_${Timestamp}'
   params: {
-    HostPoolName: HostPoolName
-    HostPoolType: hostPool.outputs.Properties.HostPoolType
-    LoadBalancerType: hostPool.outputs.Properties.LoadBalancerType
-    Location: hostPool.outputs.Location
-    PreferredAppGroupType: hostPool.outputs.Properties.PreferredAppGroupType
-    Tags: hostPool.outputs.Tags
+    DomainPassword: DomainPassword
+    DomainUserPrincipalName: DomainUserPrincipalName
+    KeyVaultName: KeyVaultName
+    LocalAdminPassword: LocalAdminPassword
+    LocalAdminUsername: LocalAdminUsername
+    Location: Location
+    RoleDefinitionId: roleDefinition.id
+    SecurityPrincipalObjectIds: SecurityPrincipalObjectIds
   }
 }
 
-@batchSize(1)
-module sessionHosts 'modules/sessionHosts.bicep' = [for i in range(1, SessionHostBatchCount): {
-  name: 'SessionHosts_${i}_${Timestamp}'
-  scope: resourceGroup(VirtualMachineResourceGroupName)
+module templateSpec 'modules/templateSpec.bicep' = {
+  scope: rg
+  name: 'TemplateSpec_${Timestamp}'
   params: {
     Availability: Availability
     AvailabilitySetNamePrefix: AvailabilitySetNamePrefix
-    AvailabilitySetCount: AvailabilitySetCount
-    AvailabilitySetIndex: BeginAvSetRange
     AvailabilityZones: AvailabilityZones
     DiskEncryptionSetResourceId: DiskEncryptionSetResourceId
-    DiskSku: hostPool.outputs.VMTemplate.osDiskType
-    DomainName: hostPool.outputs.VMTemplate.domain
     DomainServices: DomainServices
-    HostPoolName: HostPoolName
-    HostPoolResourceGroupName: HostPoolResourceGroupName
-    ImageId: hostPool.outputs.VMTemplate.customImageId == null ? '' : hostPool.outputs.VMTemplate.customImageId
-    ImageOffer: hostPool.outputs.VMTemplate.galleryImageOffer == null ? '' : hostPool.outputs.VMTemplate.galleryImageOffer
-    ImagePublisher: hostPool.outputs.VMTemplate.galleryImagePublisher == null ? '' : hostPool.outputs.VMTemplate.galleryImagePublisher
-    ImageSku: hostPool.outputs.VMTemplate.galleryImageSku == null ? '' : hostPool.outputs.VMTemplate.galleryImageSku
-    ImageType: hostPool.outputs.VMTemplate.imageType
-    ImageVersion: 'latest'
-    KeyVaultName: KeyVaultName
-    KeyVaultResourceGroupName: KeyVaultResourceGroupName
-    KeyVaultSubscriptionId: KeyVaultSubscriptionId
-    Location: VirtualMachineLocation
+    HostPoolResourceId: HostPoolResourceId
+    KeyVaultResourceId: keyVault.outputs.resourceId
+    Location: Location
+    SessionHostLocation: SessionHostLocation
     SessionHostOuPath: SessionHostOuPath
-    SessionHostCount: i == SessionHostBatchCount && DivisionRemainderValue > 0 ? DivisionRemainderValue : MaxResourcesPerTemplateDeployment
-    SessionHostIndex: i == 1 ? SessionHostIndex : ((i - 1) * MaxResourcesPerTemplateDeployment) + SessionHostIndex
+    SessionHostResourceGroupName: SessionHostResourceGroupName
     SubnetResourceId: SubnetResourceId
-    Timestamp: Timestamp
-    TrustedLaunch: hostPool.outputs.VMTemplate.securityType == 'TrustedLaunch' ? true : false
-    VirtualMachineNamePrefix: hostPool.outputs.VMTemplate.namePrefix
-    VirtualMachineSize: hostPool.outputs.VMTemplate.vmSize.id
-    VirtualMachineTags: hostPool.outputs.Tags
+    Tags: Tags
+    TemplateSpecName: TemplateSpecName
+    TemplateSpecVersion: TemplateSpecVersion
   }
-  dependsOn: [
-    hostPoolRegistrationToken
-  ]
-}]
+}

@@ -1,70 +1,539 @@
 {
-  "$schema": "https://schema.management.azure.com/schemas/2021-09-09/uiFormDefinition.schema.json",
-  "view": {
-    "kind": "Form",
-    "properties": {
-      "title": "",
-      "steps": [
-        {
-          "name": "basics",
-          "label": "Basics",
-          "elements": [
-            {
-              "name": "resourceScope",
-              "type": "Microsoft.Common.ResourceScope",
-              "location": {
-                "resourceTypes": [],
-                "allowedValues": []
-              },
-              "subscription": {
-                "constraints": {
-                  "validations": [
-                    {
-                      "isValid": "",
-                      "message": ""
-                    }
-                  ]
+    "$schema": "https://schema.management.azure.com/schemas/2021-09-09/uiFormDefinition.schema.json",
+    "view": {
+        "kind": "Form",
+        "properties": {
+            "title": "AVD Session Hosts - Custom Deployment UI",
+            "steps": [
+                {
+                    "name": "basics",
+                    "label": "Basics",
+                    "elements": [
+                        {
+                            "name": "resourceScope",
+                            "type": "Microsoft.Common.ResourceScope",
+                            "location": {
+                                "resourceTypes": [
+                                    "Microsoft.KeyVault/vaults",
+                                    "Microsoft.Resources/templateSpecs"
+                                ],
+                                "allowedValues": []
+                            }
+                        },
+                        {
+                            "name": "names",
+                            "type": "Microsoft.Common.Section",
+                            "label": "Resource Names",
+                            "elements": [
+                                {
+                                    "name": "keyVault",
+                                    "type": "Microsoft.Common.TextBox",
+                                    "label": "Key Vault",
+                                    "placeholder": "kv-avd-d-use",
+                                    "defaultValue": "kv-avd-d-use",
+                                    "toolTip": "Input the name for the new key vault.",
+                                    "constraints": {
+                                        "required": true,
+                                        "regex": "^(?!.*-{2}.*)([a-zA-Z][a-zA-Z0-9-]{1,22}[a-zA-Z0-9])$",
+                                        "validationMessage": "The value must be 3 to 24 characters in length. The value must contain only the following: alphanumerics and hyphens. The value must start with a letter. The value must end with a letter or digit.  The value cannot contain consecutive hyphens."
+                                    },
+                                    "visible": true
+                                },
+                                {
+                                    "name": "resourceGroup",
+                                    "type": "Microsoft.Common.TextBox",
+                                    "label": "Resource Group",
+                                    "placeholder": "rg-avd-d-use",
+                                    "defaultValue": "rg-avd-d-use",
+                                    "toolTip": "Input the name for the new resource group.",
+                                    "constraints": {
+                                        "required": true,
+                                        "regex": "^(?!.*[\\.]$)[a-zA-Z0-9_\\.()-]{1,90}$",
+                                        "validationMessage": "The value must be 1 to 90 characters in length. The value must contain only the following: alphanumerics, underscores, parentheses, hyphens, periods, and unicode characters that match the regex documentation. The value cannot end with a period."
+                                    },
+                                    "visible": true
+                                },
+                                {
+                                    "name": "templateSpec",
+                                    "type": "Microsoft.Common.TextBox",
+                                    "label": "Template Spec",
+                                    "placeholder": "ts-avd-d-use",
+                                    "defaultValue": "ts-avd-d-use",
+                                    "toolTip": "Input the name for the new template spec.",
+                                    "constraints": {
+                                        "required": true,
+                                        "regex": "^[a-zA-Z0-9_\\.()-]{1,90}$",
+                                        "validationMessage": "The value must be 1 to 90 characters in length. The value must contain only the following: alphanumerics, underscores, parentheses, hyphens, and periods."
+                                    },
+                                    "visible": true
+                                },
+                                {
+                                    "name": "templateSpecVersion",
+                                    "type": "Microsoft.Common.TextBox",
+                                    "label": "Template Spec Version",
+                                    "placeholder": "1.0",
+                                    "defaultValue": "1.0",
+                                    "toolTip": "Input the name for the new template spec version.",
+                                    "constraints": {
+                                        "required": true,
+                                        "regex": "^[a-zA-Z0-9_\\.()-]{1,64}$",
+                                        "validationMessage": "The value must be 1 to 64 characters in length. The value must contain only the following: alphanumerics, underscores, parentheses, hyphens, and periods."
+                                    },
+                                    "visible": true
+                                }
+                            ]
+                        },
+                        {
+                            "name": "scope",
+                            "type": "Microsoft.Common.Section",
+                            "label": "Solution Scope",
+                            "elements": [
+                                {
+                                    "name": "hostPool",
+                                    "type": "Microsoft.Solutions.ResourceSelector",
+                                    "label": "Host Pool",
+                                    "resourceType": "Microsoft.DesktopVirtualization/hostPools",
+                                    "options": {
+                                        "filter": {
+                                            "subscription": "onBasics",
+                                            "location": "onBasics"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "sessionHosts",
+                    "label": "Session Hosts",
+                    "elements": [
+                        {
+                            "name": "resourceGroupsApi",
+                            "type": "Microsoft.Solutions.ArmApiControl",
+                            "request": {
+                                "method": "GET",
+                                "path": "[concat(steps('basics').resourceScope.subscription.id, '/resourceGroups?api-version=2021-04-01')]"
+                            }
+                        },
+                        {
+                            "name": "resourceGroup",
+                            "type": "Microsoft.Common.DropDown",
+                            "label": "Resource Group",
+                            "multiselect": false,
+                            "defaultValue": "",
+                            "toolTip": "Select the name of the existing resource group for the AVD session hosts.",
+                            "filterPlaceholder": "",
+                            "defaultDescription": "",
+                            "constraints": {
+                                "allowedValues": "[map(steps('sessionHosts').resourceGroupsApi.value, (item) => parse(concat('{\"label\":\"', item.name, '\",\"value\":\"', item.name, '\"}')))]",
+                                "required": true
+                            },
+                            "infoMessages": [],
+                            "visible": true
+                        },
+                        {
+                            "name": "computeApi",
+                            "type": "Microsoft.Solutions.ArmApiControl",
+                            "request": {
+                                "method": "GET",
+                                "path": "[concat(steps('basics').resourceScope.subscription.id,'/providers/Microsoft.Compute/resourceTypes?api-version=2021-04-01')]"
+                            }
+                        },
+                        {
+                            "name": "location",
+                            "type": "Microsoft.Common.DropDown",
+                            "visible": true,
+                            "filter": true,
+                            "label": "Virtual Machine Location",
+                            "defaultValue": "[steps('basics').resourceScope.location.displayName]",
+                            "toolTip": "Select the target location for your AVD session hosts. This location can be different than your host pool location.",
+                            "constraints": {
+                                "allowedValues": "[map(first(map(filter(steps('sessionHosts').computeApi.value, (resourceTypes) => equals(resourceTypes.resourceType, 'virtualMachines')), (item) => item.locations)), (item) => parse(concat('{\"label\":\"', item, '\",\"value\":\"', toLower(replace(item, ' ', '')), '\"}')))]",
+                                "required": true
+                            }
+                        },
+                        {
+                            "name": "availabilityOptions",
+                            "type": "Microsoft.Common.DropDown",
+                            "label": "Options",
+                            "placeholder": "",
+                            "defaultValue": [
+                                "None"
+                            ],
+                            "toolTip": "Select the availability for your AVD session hosts. This is only significant for pooled host pools.",
+                            "multiselect": false,
+                            "selectAll": false,
+                            "filter": false,
+                            "multiLine": false,
+                            "defaultDescription": "",
+                            "constraints": {
+                                "allowedValues": [
+                                    {
+                                        "label": "No infrastructure redundancy required",
+                                        "value": "None"
+                                    },
+                                    {
+                                        "label": "Availability Zones",
+                                        "value": "AvailabilityZones"
+                                    },
+                                    {
+                                        "label": "Availability Set(s)",
+                                        "value": "AvailabilitySet"
+                                    }
+                                ],
+                                "required": true
+                            },
+                            "visible": true
+                        },
+                        {
+                            "name": "availabilityZones",
+                            "type": "Microsoft.Common.DropDown",
+                            "label": "Availability Zones",
+                            "placeholder": "",
+                            "defaultValue": [
+                                "1"
+                            ],
+                            "toolTip": "Select the availability zones for your AVD session hosts. This is only significant for pooled host pools.",
+                            "multiselect": true,
+                            "selectAll": true,
+                            "filter": false,
+                            "multiLine": false,
+                            "defaultDescription": "",
+                            "constraints": {
+                                "allowedValues": [
+                                    {
+                                        "label": "1",
+                                        "value": "1"
+                                    },
+                                    {
+                                        "label": "2",
+                                        "value": "2"
+                                    },
+                                    {
+                                        "label": "3",
+                                        "value": "3"
+                                    }
+                                ],
+                                "required": true
+                            },
+                            "visible": "[equals(steps('sessionHosts').availability.options, 'AvailabilityZones')]"
+                        },
+                        {
+                            "name": "availabilitySet",
+                            "type": "Microsoft.Common.TextBox",
+                            "label": "Availability Set Name Prefix",
+                            "placeholder": "as-avd-d-use",
+                            "defaultValue": "as-avd-d-use",
+                            "toolTip": "Input the name prefix for the new availability set(s).",
+                            "constraints": {
+                                "required": true,
+                                "regex": "^(?:[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9_\\.-]{0,76})$",
+                                "validationMessage": "The value must be 1 to 77 characters in length. The value must contain only the following: alphanumerics, underscores, periods, and hyphens. The value must start with an alphanumeric."
+                            },
+                            "visible": "[equals(steps('sessionHosts').availability.options, 'AvailabilitySet')]"
+                        },
+                        {
+                            "name": "diskEncryptionSetsApi",
+                            "type": "Microsoft.Solutions.ArmApiControl",
+                            "request": {
+                                "method": "GET",
+                                "path": "[concat(steps('basics').resourceScope.subscription.id, '/providers/Microsoft.Compute/diskEncryptionSets?api-version=2021-12-01')]"
+                            }
+                        },
+                        {
+                            "name": "diskEncryptionSet",
+                            "type": "Microsoft.Common.DropDown",
+                            "label": "Disk Encryption Set",
+                            "multiselect": false,
+                            "defaultValue": "",
+                            "toolTip": "Select the name of the existing disk encryption set for the AVD session hosts.",
+                            "filterPlaceholder": "",
+                            "defaultDescription": "",
+                            "constraints": {
+                                "allowedValues": "[map(steps('sessionHosts').diskEncryptionSetsApi.value, (item) => parse(concat('{\"label\":\"', item.name, '\",\"value\":\"', item.id, '\"}')))]",
+                                "required": false
+                            },
+                            "infoMessages": [],
+                            "visible": true
+                        },
+                        {
+                            "name": "network",
+                            "type": "Microsoft.Common.Section",
+                            "label": "Network",
+                            "elements": [
+                                {
+                                    "name": "virtualNetwork",
+                                    "type": "Microsoft.Solutions.ResourceSelector",
+                                    "visible": true,
+                                    "label": "Virtual network",
+                                    "toolTip": "Select the target virtual network for your AVD session hosts.",
+                                    "resourceType": "Microsoft.Network/virtualNetworks",
+                                    "options": {
+                                        "filter": {
+                                            "subscription": "onBasics",
+                                            "location": "onBasics"
+                                        }
+                                    }
+                                },
+                                {
+                                    "name": "subnetsApi",
+                                    "type": "Microsoft.Solutions.ArmApiControl",
+                                    "request": {
+                                        "method": "GET",
+                                        "path": "[concat(steps('sessionHosts').network.virtualNetwork.id, '/subnets?api-version=2022-05-01')]"
+                                    }
+                                },
+                                {
+                                    "name": "subnet",
+                                    "type": "Microsoft.Common.DropDown",
+                                    "visible": true,
+                                    "label": "Subnet",
+                                    "defaultValue": "",
+                                    "toolTip": "Select the target subnet for your AVD session hosts.",
+                                    "constraints": {
+                                        "allowedValues": "[map(steps('sessionHosts').network.subnetsApi.value, (item) => parse(concat('{\"label\":\"', item.name, '\",\"value\":\"', item.id, '\"}')))]"
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "domain",
+                            "type": "Microsoft.Common.Section",
+                            "label": "Domain to Join",
+                            "elements": [
+                                {
+                                    "name": "directory",
+                                    "type": "Microsoft.Common.DropDown",
+                                    "label": "Select which directory you would like to join",
+                                    "placeholder": "",
+                                    "defaultValue": [
+                                        "ActiveDirectory"
+                                    ],
+                                    "toolTip": "Select the directory for authentication to the AVD session hosts.",
+                                    "multiselect": false,
+                                    "selectAll": false,
+                                    "filter": false,
+                                    "multiLine": false,
+                                    "defaultDescription": "",
+                                    "constraints": {
+                                        "allowedValues": [
+                                            {
+                                                "label": "Active Directory",
+                                                "value": "ActiveDirectory"
+                                            },
+                                            {
+                                                "label": "Azure Active Directory",
+                                                "value": "None"
+                                            },
+                                            {
+                                                "label": "Azure Active Directory with Intune Enrollment",
+                                                "value": "NoneWithIntune"
+                                            }
+                                        ],
+                                        "required": true
+                                    },
+                                    "visible": "[equals(steps('sessionHosts').availability.options, 'AvailabilityZones')]"
+                                },
+                                {
+                                    "name": "userPrincipalName",
+                                    "type": "Microsoft.Common.TextBox",
+                                    "visible": "[equals(steps('sessionHosts').domain.directory, 'ActiveDirectory')]",
+                                    "label": "User Principal Name",
+                                    "toolTip": "Enter the user principal name with domain join privileges.",
+                                    "placeholder": "",
+                                    "constraints": {
+                                        "required": true,
+                                        "regex": "^[a-z0-9A-Z_.-]+@(?:[a-z0-9]+\\.)+[a-z]+$",
+                                        "validationMessage": "The value must be a valid user principal name."
+                                    }
+                                },
+                                {
+                                    "name": "password",
+                                    "type": "Microsoft.Common.PasswordBox",
+                                    "label": {
+                                        "password": "Password"
+                                    },
+                                    "toolTip": "Enter a password that is alphanumeric, contains at least 12 characters, 1 letter, 1 number and 1 special character.",
+                                    "constraints": {
+                                        "required": true,
+                                        "regex": "",
+                                        "validationMessage": ""
+                                    },
+                                    "options": {
+                                        "hideConfirmation": true
+                                    },
+                                    "visible": "[equals(steps('sessionHosts').domain.directory, 'ActiveDirectory')]"
+                                },
+                                {
+                                    "name": "ouPath",
+                                    "type": "Microsoft.Common.TextBox",
+                                    "visible": "[equals(steps('sessionHosts').domain.directory, 'ActiveDirectory')]",
+                                    "label": "Organizational Unit Path",
+                                    "toolTip": "Enter the distinguished name for the target Active Directory organizational unit.",
+                                    "placeholder": "",
+                                    "constraints": {
+                                        "required": false,
+                                        "regex": "^(?:(?:CN|OU|DC)=[a-zA-Z0-9-_ ]+,?)+$",
+                                        "validationMessage": "The value must be a valid distinguished name of an Active Directory organizational unit."
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "localAccount",
+                            "type": "Microsoft.Common.Section",
+                            "label": "Virtual Machine Administrator Account",
+                            "elements": [
+                                {
+                                    "name": "username",
+                                    "type": "Microsoft.Compute.UserNameTextBox",
+                                    "label": "Username",
+                                    "defaultValue": "",
+                                    "toolTip": "",
+                                    "constraints": {
+                                        "required": true,
+                                        "regex": "^[a-z0-9A-Z]{1,30}$",
+                                        "validationMessage": "Only alphanumeric characters are allowed, and the value must be 1-30 characters long."
+                                    },
+                                    "osPlatform": "Windows",
+                                    "visible": true
+                                },
+                                {
+                                    "name": "password",
+                                    "type": "Microsoft.Common.PasswordBox",
+                                    "label": {
+                                        "password": "Password",
+                                        "confirmPassword": "Confirm Password"
+                                    },
+                                    "toolTip": "The password must be alphanumeric, contain at least 12 characters, have at least 1 letter, 1 number and 1 special character.",
+                                    "constraints": {
+                                        "required": true,
+                                        "regex": "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=_!*<>()])(?=\\S+$).{12,123}$",
+                                        "validationMessage": "The value must be within 12 to 123 characters, be alphanumeric, and include 1 lower case character, 1 upper case character, 1 number, and 1 special character that is not '\\' or '-'."
+                                    },
+                                    "options": {
+                                        "hideConfirmation": false
+                                    },
+                                    "visible": true
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "keyVaultAccess",
+                    "label": "Key Vault Access",
+                    "elements": [
+                        {
+                            "name": "securityPrincipalObjectIds",
+                            "type": "Microsoft.Common.EditableGrid",
+                            "ariaLabel": "Enter the Azure AD objects IDs for the security principals",
+                            "label": "Security Principal Object IDs",
+                            "constraints": {
+                                "width": "Full",
+                                "rows": {
+                                    "count": {
+                                        "min": 0,
+                                        "max": 10
+                                    }
+                                },
+                                "columns": [
+                                    {
+                                        "id": "objectId",
+                                        "header": "Object ID",
+                                        "width": "1fr",
+                                        "element": {
+                                            "type": "Microsoft.Common.TextBox",
+                                            "placeholder": "",
+                                            "constraints": {
+                                                "required": true,
+                                                "validations": []
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "tags",
+                    "label": "Tags",
+                    "elements": [
+                        {
+                            "name": "customTags",
+                            "type": "Microsoft.Common.EditableGrid",
+                            "ariaLabel": "Enter information per person",
+                            "label": "Resource Tags",
+                            "constraints": {
+                                "width": "Full",
+                                "rows": {
+                                    "count": {
+                                        "min": 0,
+                                        "max": 10
+                                    }
+                                },
+                                "columns": [
+                                    {
+                                        "id": "name",
+                                        "header": "Name",
+                                        "width": "1fr",
+                                        "element": {
+                                            "type": "Microsoft.Common.TextBox",
+                                            "placeholder": "",
+                                            "constraints": {
+                                                "required": true,
+                                                "validations": []
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "id": "value",
+                                        "header": "Value",
+                                        "width": "1fr",
+                                        "element": {
+                                            "type": "Microsoft.Common.TextBox",
+                                            "placeholder": "",
+                                            "constraints": {
+                                                "required": true,
+                                                "validations": []
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ]
                 }
-              }
+            ]
+        },
+        "outputs": {
+            "parameters": {
+                "Availability": "[steps('sessionHosts').availabilityOptions]",
+                "AvailabilitySetNamePrefix": "[if(equals(steps('sessionHosts').availabilityOptions, 'AvailabilitySet'), steps('sessionHosts').availabilitySet, '')]",
+                "AvailabilityZones": "[if(equals(steps('sessionHosts').availabilityOptions, 'AvailabilityZones'), steps('sessionHosts').availabilityZones, parse('[\"1\"]'))]",
+                "DiskEncryptionSetResourceId": "[steps('sessionHosts').diskEncryptionSet]",
+                "DomainPassword ": "[if(equals(steps('sessionHosts').domain.directory, 'ActiveDirectory'), steps('sessionHosts').domain.password, '')]",
+                "DomainServices": "[steps('sessionHosts').domain.directory]",
+                "DomainUserPrincipalName": "[if(equals(steps('sessionHosts').domain.directory, 'ActiveDirectory'), steps('sessionHosts').domain.userPrincipalName, '')]",
+                "HostPoolResourceId": "[steps('basics').scope.hostPool.id]",
+                "KeyVaultName": "[steps('basics').names.keyVault]",
+                "LocalAdminPassword": "[steps('sessionHosts').localAccount.password]",
+                "LocalAdminUsername": "[steps('sessionHosts').localAccount.username]",
+                "ResourceGroupName": "[steps('basics').names.resourceGroup]",
+                "SecurityPrincipalObjectIds": "[if(equals(steps('keyVaultAccess').securityPrincipalObjectIds, parse('[{\"objectId\":\"\"}]')), parse('[]'), map(steps('keyVaultAccess').securityPrincipalObjectIds, (item) => parse(concat('\"', item.objectId, '\"'))))]",
+                "SessionHostLocation": "[steps('sessionHosts').location]",
+                "SessionHostOuPath": "[steps('sessionHosts').domain.ouPath]",
+                "SessionHostResourceGroupName": "[steps('sessionHosts').resourceGroup]",
+                "SubnetResourceId": "[steps('sessionHosts').network.subnet]",
+                "Tags": "[if(equals(steps('tags').customTags, parse('[{\"name\":\"\",\"value\":\"\"}]')), parse('{}'), parse(replace(replace(replace(replace(string(map(steps('tags').customTags, (item) => parse(concat('{\"', item.name, '\": \"', item.value, '\"}')))), '{', ''), '}', ''), '[', '{'), ']', '}')))]",
+                "TemplateSpecName": "[steps('basics').names.templateSpec]",
+                "TemplateSpecVersion": "[steps('basics').names.templateSpecVersion]"
             },
-            {
-              "name": "sessionHostIndex",
-              "type": "Microsoft.Common.Slider",
-              "min": 0,
-              "max": 4999,
-              "label": "Session Host Index",
-              "showStepMarkers": false,
-              "toolTip": "Pick the number of the first session host in this deployment.",
-              "constraints": {
-                "required": true
-              },
-              "visible": true
-            },
-            {
-              "name": "sessionHostCount",
-              "type": "Microsoft.Common.Slider",
-              "min": 1,
-              "max": "[sub(5000, steps('basics').sessionHostIndex)]",
-              "label": "Session Host Count",
-              "showStepMarkers": false,
-              "toolTip": "Pick the number of session hosts to deploy.",
-              "constraints": {
-                "required": true
-              },
-              "visible": true
-            }
-          ]
+            "kind": "Subscription",
+            "location": "[steps('basics').resourceScope.location.name]",
+            "subscriptionId": "[steps('basics').resourceScope.subscription.id]"
         }
-      ]
-    },
-    "outputs": {
-      "parameters": {
-        "SessionHostCount": "[steps('basics').sessionHostCount]",
-        "SessionHostIndex": "[steps('basics').sessionHostIndex]"
-      },
-      "kind": "Subscription",
-      "location": "[steps('basics').resourceScope.location.name]",
-      "subscriptionId": "[steps('basics').resourceScope.subscription.id]"
     }
-  }
 }

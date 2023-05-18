@@ -11,7 +11,6 @@ param Tags object
 param Timestamp string
 param VirtualMachineNamePrefix string
 
-
 resource jsonADDomainExtension 'Microsoft.Compute/virtualMachines/extensions@2021-03-01' = [for i in range(0, SessionHostCount): {
   name: '${VirtualMachineNamePrefix}${padLeft((i + SessionHostIndex), 4, '0')}/JsonADDomainExtension'
   location: Location
