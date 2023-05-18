@@ -156,7 +156,7 @@
                         {
                             "name": "availabilityOptions",
                             "type": "Microsoft.Common.DropDown",
-                            "label": "Options",
+                            "label": "Availability Options",
                             "placeholder": "",
                             "defaultValue": [
                                 "None"
@@ -217,7 +217,7 @@
                                 ],
                                 "required": true
                             },
-                            "visible": "[equals(steps('sessionHosts').availability.options, 'AvailabilityZones')]"
+                            "visible": "[equals(steps('sessionHosts').availabilityOptions, 'AvailabilityZones')]"
                         },
                         {
                             "name": "availabilitySet",
@@ -231,7 +231,7 @@
                                 "regex": "^(?:[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9_\\.-]{0,76})$",
                                 "validationMessage": "The value must be 1 to 77 characters in length. The value must contain only the following: alphanumerics, underscores, periods, and hyphens. The value must start with an alphanumeric."
                             },
-                            "visible": "[equals(steps('sessionHosts').availability.options, 'AvailabilitySet')]"
+                            "visible": "[equals(steps('sessionHosts').availabilityOptions, 'AvailabilitySet')]"
                         },
                         {
                             "name": "diskEncryptionSetsApi",
@@ -292,7 +292,8 @@
                                     "defaultValue": "",
                                     "toolTip": "Select the target subnet for your AVD session hosts.",
                                     "constraints": {
-                                        "allowedValues": "[map(steps('sessionHosts').network.subnetsApi.value, (item) => parse(concat('{\"label\":\"', item.name, '\",\"value\":\"', item.id, '\"}')))]"
+                                        "allowedValues": "[map(steps('sessionHosts').network.subnetsApi.value, (item) => parse(concat('{\"label\":\"', item.name, '\",\"value\":\"', item.id, '\"}')))]",
+                                        "required": true
                                     }
                                 }
                             ]
@@ -333,7 +334,7 @@
                                         ],
                                         "required": true
                                     },
-                                    "visible": "[equals(steps('sessionHosts').availability.options, 'AvailabilityZones')]"
+                                    "visible": true
                                 },
                                 {
                                     "name": "userPrincipalName",
@@ -513,7 +514,7 @@
                 "Availability": "[steps('sessionHosts').availabilityOptions]",
                 "AvailabilitySetNamePrefix": "[if(equals(steps('sessionHosts').availabilityOptions, 'AvailabilitySet'), steps('sessionHosts').availabilitySet, '')]",
                 "AvailabilityZones": "[if(equals(steps('sessionHosts').availabilityOptions, 'AvailabilityZones'), steps('sessionHosts').availabilityZones, parse('[\"1\"]'))]",
-                "DiskEncryptionSetResourceId": "[steps('sessionHosts').diskEncryptionSet]",
+                "DiskEncryptionSetResourceId": "[if(empty(steps('sessionHosts').diskEncryptionSet), '', steps('sessionHosts').diskEncryptionSet)]",
                 "DomainPassword ": "[if(equals(steps('sessionHosts').domain.directory, 'ActiveDirectory'), steps('sessionHosts').domain.password, '')]",
                 "DomainServices": "[steps('sessionHosts').domain.directory]",
                 "DomainUserPrincipalName": "[if(equals(steps('sessionHosts').domain.directory, 'ActiveDirectory'), steps('sessionHosts').domain.userPrincipalName, '')]",
@@ -524,7 +525,7 @@
                 "ResourceGroupName": "[steps('basics').names.resourceGroup]",
                 "SecurityPrincipalObjectIds": "[if(equals(steps('keyVaultAccess').securityPrincipalObjectIds, parse('[{\"objectId\":\"\"}]')), parse('[]'), map(steps('keyVaultAccess').securityPrincipalObjectIds, (item) => parse(concat('\"', item.objectId, '\"'))))]",
                 "SessionHostLocation": "[steps('sessionHosts').location]",
-                "SessionHostOuPath": "[steps('sessionHosts').domain.ouPath]",
+                "SessionHostOuPath": "[if(empty(steps('sessionHosts').domain.ouPath), '', steps('sessionHosts').domain.ouPath)]",
                 "SessionHostResourceGroupName": "[steps('sessionHosts').resourceGroup]",
                 "SubnetResourceId": "[steps('sessionHosts').network.subnet]",
                 "Tags": "[if(equals(steps('tags').customTags, parse('[{\"name\":\"\",\"value\":\"\"}]')), parse('{}'), parse(replace(replace(replace(replace(string(map(steps('tags').customTags, (item) => parse(concat('{\"', item.name, '\": \"', item.value, '\"}')))), '{', ''), '}', ''), '[', '{'), ']', '}')))]",
