@@ -512,7 +512,7 @@
             "parameters": {
                 "Availability": "[steps('sessionHosts').availabilityOptions]",
                 "AvailabilitySetNamePrefix": "[if(equals(steps('sessionHosts').availabilityOptions, 'AvailabilitySet'), steps('sessionHosts').availabilitySet, '')]",
-                "AvailabilityZones": "[if(equals(steps('sessionHosts').availabilityOptions, 'AvailabilityZones'), steps('sessionHosts').availabilityZones, parse('[\"1\"]'))]",
+                "AvailabilityZones": "[if(equals(steps('sessionHosts').availabilityOptions, 'AvailabilityZones'), steps('sessionHosts').availabilityZones, parse('[[\"1\"]'))]",
                 "DiskEncryptionSetResourceId": "[steps('sessionHosts').diskEncryptionSet]",
                 "DomainPassword ": "[if(equals(steps('sessionHosts').domain.directory, 'ActiveDirectory'), steps('sessionHosts').domain.password, '')]",
                 "DomainServices": "[steps('sessionHosts').domain.directory]",
