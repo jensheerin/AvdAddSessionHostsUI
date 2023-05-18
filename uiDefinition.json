@@ -522,6 +522,7 @@
                 "KeyVaultName": "[steps('basics').names.keyVault]",
                 "LocalAdminPassword": "[steps('sessionHosts').localAccount.password]",
                 "LocalAdminUsername": "[steps('sessionHosts').localAccount.username]",
+                "Location": "[steps('basics').resourceScope.location.name]",
                 "ResourceGroupName": "[steps('basics').names.resourceGroup]",
                 "SecurityPrincipalObjectIds": "[if(equals(steps('keyVaultAccess').securityPrincipalObjectIds, parse('[{\"objectId\":\"\"}]')), parse('[]'), map(steps('keyVaultAccess').securityPrincipalObjectIds, (item) => parse(concat('\"', item.objectId, '\"'))))]",
                 "SessionHostLocation": "[steps('sessionHosts').location]",
