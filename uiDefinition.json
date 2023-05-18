@@ -531,7 +531,8 @@
                 "SubnetResourceId": "[steps('sessionHosts').network.subnet]",
                 "Tags": "[if(equals(steps('tags').customTags, parse('[{\"name\":\"\",\"value\":\"\"}]')), parse('{}'), parse(replace(replace(replace(replace(string(map(steps('tags').customTags, (item) => parse(concat('{\"', item.name, '\": \"', item.value, '\"}')))), '{', ''), '}', ''), '[', '{'), ']', '}')))]",
                 "TemplateSpecName": "[steps('basics').names.templateSpec]",
-                "TemplateSpecVersion": "[steps('basics').names.templateSpecVersion]"
+                "TemplateSpecVersion": "[steps('basics').names.templateSpecVersion]",
+                "Timestamp": "1234567890"
             },
             "kind": "Subscription",
             "location": "[steps('basics').resourceScope.location.name]",
