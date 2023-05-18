@@ -383,6 +383,7 @@
                                     "label": "Organizational Unit Path",
                                     "toolTip": "Enter the distinguished name for the target Active Directory organizational unit.",
                                     "placeholder": "",
+                                    "defaultValue": "",
                                     "constraints": {
                                         "required": false,
                                         "regex": "^(?:(?:CN|OU|DC)=[a-zA-Z0-9-_ ]+,?)+$",
@@ -523,8 +524,8 @@
             "parameters": {
                 "Availability": "[steps('sessionHosts').availabilityOptions]",
                 "AvailabilitySetNamePrefix": "[if(equals(steps('sessionHosts').availabilityOptions, 'AvailabilitySet'), steps('sessionHosts').availabilitySet, '')]",
-                "AvailabilityZones": "[if(equals(steps('sessionHosts').availabilityOptions, 'AvailabilityZones'), steps('sessionHosts').availabilityZones, parse('[\"1\"]'))]",
-                "DiskEncryptionSetResourceId": "[if(empty(steps('sessionHosts').diskEncryptionSet), '', steps('sessionHosts').diskEncryptionSet)]",
+                "AvailabilityZones": "[steps('sessionHosts').availabilityZones]",
+                "DiskEncryptionSetResourceId": "[steps('sessionHosts').diskEncryptionSet]",
                 "DomainPassword": "[if(equals(steps('sessionHosts').domain.directory, 'ActiveDirectory'), steps('sessionHosts').domain.password, '')]",
                 "DomainServices": "[steps('sessionHosts').domain.directory]",
                 "DomainUserPrincipalName": "[if(equals(steps('sessionHosts').domain.directory, 'ActiveDirectory'), steps('sessionHosts').domain.userPrincipalName, '')]",
@@ -535,7 +536,7 @@
                 "ResourceGroupName": "[steps('basics').names.resourceGroup]",
                 "SecurityPrincipalObjectIds": "[if(equals(steps('keyVaultAccess').securityPrincipalObjectIds, parse('[{\"objectId\":\"\"}]')), parse('[]'), map(steps('keyVaultAccess').securityPrincipalObjectIds, (item) => parse(concat('\"', item.objectId, '\"'))))]",
                 "SessionHostLocation": "[steps('sessionHosts').location]",
-                "SessionHostOuPath": "[if(empty(steps('sessionHosts').domain.ouPath), '', steps('sessionHosts').domain.ouPath)]",
+                "SessionHostOuPath": "[steps('sessionHosts').domain.ouPath]",
                 "SessionHostResourceGroupName": "[steps('sessionHosts').resourceGroup]",
                 "SubnetResourceId": "[steps('sessionHosts').network.subnet]",
                 "Tags": "[if(equals(steps('tags').customTags, parse('[{\"name\":\"\",\"value\":\"\"}]')), parse('{}'), parse(replace(replace(replace(replace(string(map(steps('tags').customTags, (item) => parse(concat('{\"', item.name, '\": \"', item.value, '\"}')))), '{', ''), '}', ''), '[', '{'), ']', '}')))]",
