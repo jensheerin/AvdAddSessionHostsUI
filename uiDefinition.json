@@ -223,8 +223,8 @@
                             "name": "availabilitySet",
                             "type": "Microsoft.Common.TextBox",
                             "label": "Availability Set Name Prefix",
-                            "placeholder": "as-avd-d-use",
-                            "defaultValue": "as-avd-d-use",
+                            "placeholder": "as-avd-d-use-",
+                            "defaultValue": "as-avd-d-use-",
                             "toolTip": "Input the name prefix for the new availability set(s).",
                             "constraints": {
                                 "required": true,
