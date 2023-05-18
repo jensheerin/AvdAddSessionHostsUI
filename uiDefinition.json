@@ -263,25 +263,35 @@
                             "label": "Network",
                             "elements": [
                                 {
-                                    "name": "virtualNetwork",
-                                    "type": "Microsoft.Solutions.ResourceSelector",
-                                    "visible": true,
-                                    "label": "Virtual network",
-                                    "toolTip": "Select the target virtual network for your AVD session hosts.",
-                                    "resourceType": "Microsoft.Network/virtualNetworks",
-                                    "options": {
-                                        "filter": {
-                                            "subscription": "onBasics",
-                                            "location": "onBasics"
-                                        }
+                                    "name": "virtualNetworksApi",
+                                    "type": "Microsoft.Solutions.ArmApiControl",
+                                    "request": {
+                                        "method": "GET",
+                                        "path": "[concat(steps('basics').resourceScope.subscription.id, '/providers/Microsoft.Network/virtualNetworks?api-version=2022-11-01')]"
                                     }
+                                },
+                                {
+                                    "name": "virtualNetwork",
+                                    "type": "Microsoft.Common.DropDown",
+                                    "label": "Virtual Network",
+                                    "multiselect": false,
+                                    "defaultValue": "",
+                                    "toolTip": "Select the name of the existing virtual network for the AVD session hosts.",
+                                    "filterPlaceholder": "",
+                                    "defaultDescription": "",
+                                    "constraints": {
+                                        "allowedValues": "[map(steps('sessionHosts').network.virtualNetworksApi.value, (item) => parse(concat('{\"label\":\"', item.name, '\",\"value\":\"', item.id, '\"}')))]",
+                                        "required": true
+                                    },
+                                    "infoMessages": [],
+                                    "visible": true
                                 },
                                 {
                                     "name": "subnetsApi",
                                     "type": "Microsoft.Solutions.ArmApiControl",
                                     "request": {
                                         "method": "GET",
-                                        "path": "[concat(steps('sessionHosts').network.virtualNetwork.id, '/subnets?api-version=2022-05-01')]"
+                                        "path": "[concat(steps('sessionHosts').network.virtualNetwork, '/subnets?api-version=2022-05-01')]"
                                     }
                                 },
                                 {
@@ -309,7 +319,7 @@
                                     "label": "Select which directory you would like to join",
                                     "placeholder": "",
                                     "defaultValue": [
-                                        "ActiveDirectory"
+                                        "Active Directory"
                                     ],
                                     "toolTip": "Select the directory for authentication to the AVD session hosts.",
                                     "multiselect": false,
@@ -515,14 +525,13 @@
                 "AvailabilitySetNamePrefix": "[if(equals(steps('sessionHosts').availabilityOptions, 'AvailabilitySet'), steps('sessionHosts').availabilitySet, '')]",
                 "AvailabilityZones": "[if(equals(steps('sessionHosts').availabilityOptions, 'AvailabilityZones'), steps('sessionHosts').availabilityZones, parse('[\"1\"]'))]",
                 "DiskEncryptionSetResourceId": "[if(empty(steps('sessionHosts').diskEncryptionSet), '', steps('sessionHosts').diskEncryptionSet)]",
-                "DomainPassword ": "[if(equals(steps('sessionHosts').domain.directory, 'ActiveDirectory'), steps('sessionHosts').domain.password, '')]",
+                "DomainPassword ": "[steps('sessionHosts').domain.password]",
                 "DomainServices": "[steps('sessionHosts').domain.directory]",
-                "DomainUserPrincipalName": "[if(equals(steps('sessionHosts').domain.directory, 'ActiveDirectory'), steps('sessionHosts').domain.userPrincipalName, '')]",
+                "DomainUserPrincipalName": "[steps('sessionHosts').domain.userPrincipalName]",
                 "HostPoolResourceId": "[steps('basics').scope.hostPool.id]",
                 "KeyVaultName": "[steps('basics').names.keyVault]",
                 "LocalAdminPassword": "[steps('sessionHosts').localAccount.password]",
                 "LocalAdminUsername": "[steps('sessionHosts').localAccount.username]",
-                "Location": "[steps('basics').resourceScope.location.name]",
                 "ResourceGroupName": "[steps('basics').names.resourceGroup]",
                 "SecurityPrincipalObjectIds": "[if(equals(steps('keyVaultAccess').securityPrincipalObjectIds, parse('[{\"objectId\":\"\"}]')), parse('[]'), map(steps('keyVaultAccess').securityPrincipalObjectIds, (item) => parse(concat('\"', item.objectId, '\"'))))]",
                 "SessionHostLocation": "[steps('sessionHosts').location]",
@@ -531,8 +540,7 @@
                 "SubnetResourceId": "[steps('sessionHosts').network.subnet]",
                 "Tags": "[if(equals(steps('tags').customTags, parse('[{\"name\":\"\",\"value\":\"\"}]')), parse('{}'), parse(replace(replace(replace(replace(string(map(steps('tags').customTags, (item) => parse(concat('{\"', item.name, '\": \"', item.value, '\"}')))), '{', ''), '}', ''), '[', '{'), ']', '}')))]",
                 "TemplateSpecName": "[steps('basics').names.templateSpec]",
-                "TemplateSpecVersion": "[steps('basics').names.templateSpecVersion]",
-                "Timestamp": "1234567890"
+                "TemplateSpecVersion": "[steps('basics').names.templateSpecVersion]"
             },
             "kind": "Subscription",
             "location": "[steps('basics').resourceScope.location.name]",
