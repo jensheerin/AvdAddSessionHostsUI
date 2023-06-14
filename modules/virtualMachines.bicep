@@ -98,6 +98,7 @@ resource virtualMachines 'Microsoft.Compute/virtualMachines@2021-11-01' = [for i
         vTpmEnabled: true
       } : null
       securityType: TrustedLaunch ? 'TrustedLaunch' : null
+      encryptionAtHost: !(empty(DiskEncryptionSetResourceId))
     }
     diagnosticsProfile: {
       bootDiagnostics: {
