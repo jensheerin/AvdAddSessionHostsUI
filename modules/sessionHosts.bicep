@@ -62,7 +62,7 @@ resource availabilitySet 'Microsoft.Compute/availabilitySets@2019-07-01' = [for 
 }]
 
 resource networkInterfaces 'Microsoft.Network/networkInterfaces@2020-05-01' = [for i in range(0, SessionHostCount): {
-  name: '${NetworkInterfaceNamePrefix}${padLeft((i + SessionHostIndex), 4, '0')}' 
+  name: '${NetworkInterfaceNamePrefix}${padLeft((i + SessionHostIndex), 2, '0')}' 
   location: Location
   tags: VirtualMachineTags
   properties: {
@@ -160,7 +160,7 @@ module jsonADDomainExtension 'extensionsJsonAdDomain.bicep' = if (contains(Domai
 }
 
 resource aadLoginForWindows 'Microsoft.Compute/virtualMachines/extensions@2021-03-01' = [for i in range(0, SessionHostCount): if (contains(DomainServices, 'None')) {
-  name: '${VirtualMachineNamePrefix}-${padLeft((i + SessionHostIndex), 3, '0')}/AADLoginForWindows'
+  name: '${VirtualMachineNamePrefix}-${padLeft((i + SessionHostIndex), 2, '0')}/AADLoginForWindows'
   location: Location
   tags: VirtualMachineTags
   properties: {
