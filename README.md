@@ -37,15 +37,15 @@ Get-AzWvdHostPool `
 
 ### Azure Portal
 
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#blade/Microsoft_Azure_CreateUIDef/CustomDeploymentBlade/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fjamasten%2FAvdAddSessionHostsUI%2Fmain%2Fsolution.json/uiFormDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Fjamasten%2FAvdAddSessionHostsUI%2Fmain%2FuiDefinition.json)
-[![Deploy to Azure Gov](https://aka.ms/deploytoazuregovbutton)](https://portal.azure.us/#blade/Microsoft_Azure_CreateUIDef/CustomDeploymentBlade/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fjamasten%2FAvdAddSessionHostsUI%2Fmain%2Fsolution.json/uiFormDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Fjamasten%2FAvdAddSessionHostsUI%2Fmain%2FuiDefinition.json)
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#blade/Microsoft_Azure_CreateUIDef/CustomDeploymentBlade/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fjensheerin%2FAvdAddSessionHostsUI%2Fmain%2Fsolution.json/uiFormDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Fjensheerin%2FAvdAddSessionHostsUI%2Fmain%2FuiDefinition.json)
+[![Deploy to Azure Gov](https://aka.ms/deploytoazuregovbutton)](https://portal.azure.us/#blade/Microsoft_Azure_CreateUIDef/CustomDeploymentBlade/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fjensheerin%2FAvdAddSessionHostsUI%2Fmain%2Fsolution.json/uiFormDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Fjensheerin%2FAvdAddSessionHostsUI%2Fmain%2FuiDefinition.json)
 
 ### PowerShell
 
 ````powershell
 New-AzDeployment `
     -Location '<Azure location>' `
-    -TemplateFile 'https://raw.githubusercontent.com/jamasten/AvdAddSessionHostsUI/main/solution.json' `
+    -TemplateFile 'https://raw.githubusercontent.com/jensheerin/AvdAddSessionHostsUI/main/solution.json' `
     -Verbose
 ````
 
@@ -54,5 +54,5 @@ New-AzDeployment `
 ````cli
 az deployment sub create \
     --location '<Azure location>' \
-    --template-uri 'https://raw.githubusercontent.com/jamasten/AvdAddSessionHostsUI/main/solution.json'
+    --template-uri 'https://raw.githubusercontent.com/jensheerin/AvdAddSessionHostsUI/main/solution.json'
 ````  
