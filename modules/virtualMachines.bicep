@@ -72,7 +72,7 @@ resource virtualMachines 'Microsoft.Compute/virtualMachines@2021-11-01' = [for i
       dataDisks: []
     }
     osProfile: {
-      computerName: '${VirtualMachineNamePrefix}${padLeft((i + SessionHostIndex), 4, '0')}'
+      computerName: '${VirtualMachineNamePrefix}-${padLeft((i + SessionHostIndex), 3, '0')}'
       adminUsername: VirtualMachineUsername
       adminPassword: VirtualMachinePassword
       windowsConfiguration: {
