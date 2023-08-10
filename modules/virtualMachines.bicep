@@ -40,7 +40,7 @@ var ImageReferences = {
 }
 
 resource virtualMachines 'Microsoft.Compute/virtualMachines@2021-11-01' = [for i in range(0, SessionHostCount): {
-  name: '${VirtualMachineNamePrefix}-${padLeft((i + SessionHostIndex), 2, '0')}'
+  name: '${VirtualMachineNamePrefix}-${padLeft((i + SessionHostIndex), 3, '0')}'
   location: Location
   tags: Tags
   identity: VirtualMachineIdentity
@@ -72,7 +72,7 @@ resource virtualMachines 'Microsoft.Compute/virtualMachines@2021-11-01' = [for i
       dataDisks: []
     }
     osProfile: {
-      computerName: '${VirtualMachineNamePrefix}-${padLeft((i + SessionHostIndex), 2, '0')}'
+      computerName: '${VirtualMachineNamePrefix}-${padLeft((i + SessionHostIndex), 3, '0')}'
       adminUsername: VirtualMachineUsername
       adminPassword: VirtualMachinePassword
       windowsConfiguration: {

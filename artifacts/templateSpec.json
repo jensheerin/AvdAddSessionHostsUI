@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.17.1.54307",
-      "templateHash": "11170129995817373537"
+      "version": "0.20.4.51522",
+      "templateHash": "483645907324480833"
     }
   },
   "parameters": {
@@ -105,8 +105,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.17.1.54307",
-              "templateHash": "1543235606614166007"
+              "version": "0.20.4.51522",
+              "templateHash": "4486679044199569248"
             }
           },
           "parameters": {
@@ -172,8 +172,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.17.1.54307",
-              "templateHash": "17258894170017447927"
+              "version": "0.20.4.51522",
+              "templateHash": "5009542683942892401"
             }
           },
           "parameters": {
@@ -324,8 +324,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.17.1.54307",
-              "templateHash": "2685408475056336629"
+              "version": "0.20.4.51522",
+              "templateHash": "7430420977500920556"
             }
           },
           "parameters": {
@@ -465,7 +465,7 @@
               },
               "type": "Microsoft.Network/networkInterfaces",
               "apiVersion": "2020-05-01",
-              "name": "[format('{0}{1}', variables('NetworkInterfaceNamePrefix'), padLeft(add(range(0, parameters('SessionHostCount'))[copyIndex()], parameters('SessionHostIndex')), 4, '0'))]",
+              "name": "[format('{0}{1}', variables('NetworkInterfaceNamePrefix'), padLeft(add(range(0, parameters('SessionHostCount'))[copyIndex()], parameters('SessionHostIndex')), 2, '0'))]",
               "location": "[parameters('Location')]",
               "tags": "[parameters('VirtualMachineTags')]",
               "properties": {
@@ -493,7 +493,7 @@
               },
               "type": "Microsoft.Compute/virtualMachines/extensions",
               "apiVersion": "2021-03-01",
-              "name": "[format('{0}{1}/CustomScriptExtension', parameters('VirtualMachineNamePrefix'), padLeft(add(range(0, parameters('SessionHostCount'))[copyIndex()], parameters('SessionHostIndex')), 4, '0'))]",
+              "name": "[format('{0}-{1}/CustomScriptExtension', parameters('VirtualMachineNamePrefix'), padLeft(add(range(0, parameters('SessionHostCount'))[copyIndex()], parameters('SessionHostIndex')), 3, '0'))]",
               "location": "[parameters('Location')]",
               "tags": "[parameters('VirtualMachineTags')]",
               "properties": {
@@ -503,7 +503,7 @@
                 "autoUpgradeMinorVersion": true,
                 "settings": {
                   "fileUris": [
-                    "https://raw.githubusercontent.com/jamasten/AvdAddSessionHostsUI/main/artifacts/Set-SessionHostConfiguration.ps1"
+                    "https://raw.githubusercontent.com/jensheerin/AvdAddSessionHostsUI/main/artifacts/Set-SessionHostConfiguration.ps1"
                   ],
                   "timestamp": "[parameters('Timestamp')]"
                 },
@@ -523,7 +523,7 @@
               "condition": "[contains(parameters('DomainServices'), 'None')]",
               "type": "Microsoft.Compute/virtualMachines/extensions",
               "apiVersion": "2021-03-01",
-              "name": "[format('{0}{1}/AADLoginForWindows', parameters('VirtualMachineNamePrefix'), padLeft(add(range(0, parameters('SessionHostCount'))[copyIndex()], parameters('SessionHostIndex')), 4, '0'))]",
+              "name": "[format('{0}-{1}/AADLoginForWindows', parameters('VirtualMachineNamePrefix'), padLeft(add(range(0, parameters('SessionHostCount'))[copyIndex()], parameters('SessionHostIndex')), 2, '0'))]",
               "location": "[parameters('Location')]",
               "tags": "[parameters('VirtualMachineTags')]",
               "properties": {
@@ -631,8 +631,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.17.1.54307",
-                      "templateHash": "10187618105992642087"
+                      "version": "0.20.4.51522",
+                      "templateHash": "12802411199982464977"
                     }
                   },
                   "parameters": {
@@ -727,7 +727,7 @@
                       },
                       "type": "Microsoft.Compute/virtualMachines",
                       "apiVersion": "2021-11-01",
-                      "name": "[format('{0}{1}', parameters('VirtualMachineNamePrefix'), padLeft(add(range(0, parameters('SessionHostCount'))[copyIndex()], parameters('SessionHostIndex')), 4, '0'))]",
+                      "name": "[format('{0}-{1}', parameters('VirtualMachineNamePrefix'), padLeft(add(range(0, parameters('SessionHostCount'))[copyIndex()], parameters('SessionHostIndex')), 3, '0'))]",
                       "location": "[parameters('Location')]",
                       "tags": "[parameters('Tags')]",
                       "identity": "[parameters('VirtualMachineIdentity')]",
@@ -747,13 +747,13 @@
                               "storageAccountType": "[parameters('DiskSku')]",
                               "diskEncryptionSet": "[if(not(empty(parameters('DiskEncryptionSetResourceId'))), createObject('id', resourceId(variables('DiskEncryptionSetResourceGroupName'), 'Microsoft.Compute/diskEncryptionSets', variables('DiskEncryptionSetName'))), null())]"
                             },
-                            "name": "[format('{0}{1}', variables('DiskNamePrefix'), padLeft(add(range(0, parameters('SessionHostCount'))[copyIndex()], parameters('SessionHostIndex')), 4, '0'))]",
+                            "name": "[format('{0}{1}', variables('DiskNamePrefix'), padLeft(add(range(0, parameters('SessionHostCount'))[copyIndex()], parameters('SessionHostIndex')), 2, '0'))]",
                             "osType": "Windows"
                           },
                           "dataDisks": []
                         },
                         "osProfile": {
-                          "computerName": "[format('{0}{1}', parameters('VirtualMachineNamePrefix'), padLeft(add(range(0, parameters('SessionHostCount'))[copyIndex()], parameters('SessionHostIndex')), 4, '0'))]",
+                          "computerName": "[format('{0}-{1}', parameters('VirtualMachineNamePrefix'), padLeft(add(range(0, parameters('SessionHostCount'))[copyIndex()], parameters('SessionHostIndex')), 3, '0'))]",
                           "adminUsername": "[parameters('VirtualMachineUsername')]",
                           "adminPassword": "[parameters('VirtualMachinePassword')]",
                           "windowsConfiguration": {
@@ -766,7 +766,7 @@
                         "networkProfile": {
                           "networkInterfaces": [
                             {
-                              "id": "[resourceId('Microsoft.Network/networkInterfaces', format('{0}{1}', parameters('NetworkInterfaceNamePrefix'), padLeft(add(range(0, parameters('SessionHostCount'))[copyIndex()], parameters('SessionHostIndex')), 4, '0')))]",
+                              "id": "[resourceId('Microsoft.Network/networkInterfaces', format('{0}{1}', parameters('NetworkInterfaceNamePrefix'), padLeft(add(range(0, parameters('SessionHostCount'))[copyIndex()], parameters('SessionHostIndex')), 2, '0')))]",
                               "properties": {
                                 "deleteOption": "Delete"
                               }
@@ -775,7 +775,8 @@
                         },
                         "securityProfile": {
                           "uefiSettings": "[if(parameters('TrustedLaunch'), createObject('secureBootEnabled', true(), 'vTpmEnabled', true()), null())]",
-                          "securityType": "[if(parameters('TrustedLaunch'), 'TrustedLaunch', null())]"
+                          "securityType": "[if(parameters('TrustedLaunch'), 'TrustedLaunch', null())]",
+                          "encryptionAtHost": "[not(empty(parameters('DiskEncryptionSetResourceId')))]"
                         },
                         "diagnosticsProfile": {
                           "bootDiagnostics": {
@@ -850,8 +851,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.17.1.54307",
-                      "templateHash": "10923910493753546301"
+                      "version": "0.20.4.51522",
+                      "templateHash": "17552358716200306408"
                     }
                   },
                   "parameters": {
